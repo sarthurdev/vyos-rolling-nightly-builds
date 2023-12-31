@@ -52,7 +52,7 @@ jobs:
         with:
           owner: "vyos"
           repo: "vyos-1x"
-          fetchReviewers: true
+          fetchReviewers: false
           fromTag: ${{ env.CHANGELOG_COMMIT_1x }}
           toTag: HEAD
 
@@ -62,7 +62,7 @@ jobs:
         with:
           owner: "vyos"
           repo: "vyos-build"
-          fetchReviewers: true
+          fetchReviewers: false
           fromTag: ${{ env.CHANGELOG_COMMIT_build }}
           toTag: HEAD
 
