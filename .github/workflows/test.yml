@@ -56,6 +56,12 @@ jobs:
           fetchReviewers: false
           fromTag: ${{ env.CHANGELOG_COMMIT_1x }}
           toTag: HEAD
+          configurationJson: |
+            {
+              "categories": [{"title": "", "labels": []}],
+              "template": "#{{CHANGELOG}}",
+              "pr_template": "- #{{TITLE}}\n   - PR: vyos/vyos-1x##{{NUMBER}}"
+            }
         if: ${{ env.CHANGELOG_COMMIT_1x != '' }}
 
       - name: generate-build-changelog
@@ -67,6 +73,12 @@ jobs:
           fetchReviewers: false
           fromTag: ${{ env.CHANGELOG_COMMIT_build }}
           toTag: HEAD
+          configurationJson: |
+            {
+              "categories": [{"title": "", "labels": []}],
+              "template": "#{{CHANGELOG}}",
+              "pr_template": "- #{{TITLE}}\n   - PR: vyos/vyos-build##{{NUMBER}}"
+            }
         if: ${{ env.CHANGELOG_COMMIT_build != '' }}
 
       - name: write-changelog
