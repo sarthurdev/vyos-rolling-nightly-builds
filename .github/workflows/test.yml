@@ -38,7 +38,7 @@ jobs:
 
       - name: last-success-build
         run: |
-          START_TIME=$(gh run list -s success -L 1 -e schedule --json updatedAt | jq .[0].updatedAt)
+          START_TIME=$(gh run list -s success -L 1 -w "VyOS rolling nightly build" --json updatedAt | jq .[0].updatedAt)
           cd ./vyos-build
           echo "CHANGELOG_COMMIT_build=$(git log --since "$START_TIME" --format="%H" -n 1)" >> $GITHUB_ENV
           cd ../vyos-1x
@@ -54,7 +54,7 @@ jobs:
           repo: "vyos-1x"
           fetchReviewers: true
           fromTag: ${{ env.CHANGELOG_COMMIT_1x }}
-          toTag: origin/current
+          toTag: HEAD
 
       - name: generate-build-changelog
         id: generate-build-changelog
@@ -64,7 +64,7 @@ jobs:
           repo: "vyos-build"
           fetchReviewers: true
           fromTag: ${{ env.CHANGELOG_COMMIT_build }}
-          toTag: origin/current
+          toTag: HEAD
 
       - name: write-changelog
         run: |
