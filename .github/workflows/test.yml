@@ -39,7 +39,7 @@ jobs:
       - name: last-success-build
         run: |
           #START_TIME=$(gh run list -s success -L 1 -w "VyOS rolling nightly build test" --json updatedAt | jq .[0].updatedAt)
-          START_TIME="2023-12-30T02:02:27Z"
+          START_TIME="2023-12-25T02:02:27Z"
           cd ./vyos-build
           echo "CHANGELOG_COMMIT_build=$(git log --since "$START_TIME" --format="%H" -n 1)" >> $GITHUB_ENV
           cd ../vyos-1x
