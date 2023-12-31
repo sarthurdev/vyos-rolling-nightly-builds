@@ -38,7 +38,7 @@ jobs:
 
       - name: last-success-build
         run: |
-          START_TIME=$(gh run list -s success -L 1 -w "VyOS rolling nightly build" --json updatedAt | jq .[0].updatedAt)
+          #START_TIME=$(gh run list -s success -L 1 -w "VyOS rolling nightly build test" --json updatedAt | jq .[0].updatedAt)
           START_TIME="2023-12-30T02:02:27Z"
           cd ./vyos-build
           echo "CHANGELOG_COMMIT_build=$(git log --since "$START_TIME" --format="%H" -n 1)" >> $GITHUB_ENV
@@ -56,6 +56,7 @@ jobs:
           fetchReviewers: false
           fromTag: ${{ env.CHANGELOG_COMMIT_1x }}
           toTag: HEAD
+        if: ${{ env.CHANGELOG_COMMIT_1x != '' }}
 
       - name: generate-build-changelog
         id: generate-build-changelog
@@ -66,13 +67,14 @@ jobs:
           fetchReviewers: false
           fromTag: ${{ env.CHANGELOG_COMMIT_build }}
           toTag: HEAD
+        if: ${{ env.CHANGELOG_COMMIT_build != '' }}
 
       - name: write-changelog
         run: |
           echo -e "## vyos-1x\n" > CHANGELOG.md
-          echo -e "${{ steps.generate_1x_changelog.outputs.changelog }}\n" >> CHANGELOG.md
+          echo -e "${{ steps.generate_1x_changelog.outputs.changelog || 'No changes' }}\n" >> CHANGELOG.md
           echo -e "## vyos-build\n" >> CHANGELOG.md
-          echo -e "${{ steps.generate_build_changelog.outputs.changelog }}" >> CHANGELOG.md
+          echo -e "${{ steps.generate_build_changelog.outputs.changelog || 'No changes' }}" >> CHANGELOG.md
 
       - name: Create autocommit and tag
         uses: stefanzweifel/git-auto-commit-action@v4
