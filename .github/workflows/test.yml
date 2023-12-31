@@ -1,0 +1,86 @@
+name: VyOS rolling nightly build test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+
+      - name: Set VyOS version
+        id: set_vyos_version
+        run: |
+          echo "VYOS_VERSION=1.5-rolling-$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v3
+
+      - name: Git clone vyos-build
+        run: git clone -b current --single-branch https://github.com/vyos/vyos-build
+
+      - name: Git clone vyos-1x
+        run: git clone -b current --single-branch https://github.com/vyos/vyos-1x
+
+      - name: create-json
+        id: create-json
+        uses: jsdaniell/create-json@v1.2.2
+        with:
+          name: "version.json"
+          json: |
+            [
+              {
+                "url": "https://github.com/vyos/vyos-rolling-nightly-builds/releases/download/${{ env.VYOS_VERSION }}/vyos-${{ env.VYOS_VERSION }}-amd64.iso",
+                "version": "${{ env.VYOS_VERSION }}"
+              }
+            ]
+
+      - name: last-success-build
+        run: |
+          START_TIME=$(gh run list -s success -L 1 -e schedule --json updatedAt | jq .[0].updatedAt)
+          cd ./vyos-build
+          REF_BUILD=$(git log --since "$START_TIME" --format="%H" -n 1)
+          cd ../vyos-1x
+          REF_1X=$(git log --since "$START_TIME" --format="%H" -n 1)
+          echo "CHANGELOG_COMMIT_build=$(REF_BUILD)" >> $GITHUB_ENV
+          echo "CHANGELOG_COMMIT_1x=$(REF_1X)" >> $GITHUB_ENV
+
+      - name: generate-1x-changelog
+        id: generate-1x-changelog
+        uses: mikepenz/release-changelog-builder-action@{latest-release}
+        with:
+          owner: "vyos"
+          repo: "vyos-1x"
+          fetchReviewers: true
+          fromTag: ${{ env.CHANGELOG_COMMIT_1x }}
+          toTag: origin/current
+
+      - name: generate-build-changelog
+        id: generate-build-changelog
+        uses: mikepenz/release-changelog-builder-action@{latest-release}
+        with:
+          owner: "vyos"
+          repo: "vyos-build"
+          fetchReviewers: true
+          fromTag: ${{ env.CHANGELOG_COMMIT_build }}
+          toTag: origin/current
+
+      - name: write-changelog
+        run: |
+          echo "## vyos-1x\n" > CHANGELOG.md
+          echo "${{ steps.generate_1x_changelog.outputs.changelog }}\n" >> CHANGELOG.md
+          echo "## vyos-build\n" >> CHANGELOG.md
+          echo "${{ steps.generate_build_changelog.outputs.changelog }}" >> CHANGELOG.md
+
+      - name: Create autocommit and tag
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          tagging_message: ${{ env.VYOS_VERSION }}
+          commit_message: ${{ env.VYOS_VERSION }}
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: CHANGELOG.md
+          tag_name: ${{ env.VYOS_VERSION }}
