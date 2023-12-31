@@ -40,11 +40,11 @@ jobs:
         run: |
           START_TIME=$(gh run list -s success -L 1 -e schedule --json updatedAt | jq .[0].updatedAt)
           cd ./vyos-build
-          REF_BUILD=$(git log --since "$START_TIME" --format="%H" -n 1)
+          echo "CHANGELOG_COMMIT_build=$(git log --since "$START_TIME" --format="%H" -n 1)" >> $GITHUB_ENV
           cd ../vyos-1x
-          REF_1X=$(git log --since "$START_TIME" --format="%H" -n 1)
-          echo "CHANGELOG_COMMIT_build=$(REF_BUILD)" >> $GITHUB_ENV
-          echo "CHANGELOG_COMMIT_1x=$(REF_1X)" >> $GITHUB_ENV
+          echo "CHANGELOG_COMMIT_1x=$(git log --since "$START_TIME" --format="%H" -n 1)" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: generate-1x-changelog
         id: generate-1x-changelog
