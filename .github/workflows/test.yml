@@ -48,7 +48,7 @@ jobs:
 
       - name: generate-1x-changelog
         id: generate-1x-changelog
-        uses: mikepenz/release-changelog-builder-action@{latest-release}
+        uses: mikepenz/release-changelog-builder-action@v4.1.0
         with:
           owner: "vyos"
           repo: "vyos-1x"
@@ -58,7 +58,7 @@ jobs:
 
       - name: generate-build-changelog
         id: generate-build-changelog
-        uses: mikepenz/release-changelog-builder-action@{latest-release}
+        uses: mikepenz/release-changelog-builder-action@v4.1.0
         with:
           owner: "vyos"
           repo: "vyos-build"
