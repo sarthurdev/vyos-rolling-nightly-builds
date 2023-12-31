@@ -39,6 +39,7 @@ jobs:
       - name: last-success-build
         run: |
           START_TIME=$(gh run list -s success -L 1 -w "VyOS rolling nightly build" --json updatedAt | jq .[0].updatedAt)
+          START_TIME="2023-12-31T02:02:27Z"
           cd ./vyos-build
           echo "CHANGELOG_COMMIT_build=$(git log --since "$START_TIME" --format="%H" -n 1)" >> $GITHUB_ENV
           cd ../vyos-1x
@@ -68,10 +69,10 @@ jobs:
 
       - name: write-changelog
         run: |
-          echo "## vyos-1x\n" > CHANGELOG.md
-          echo "${{ steps.generate_1x_changelog.outputs.changelog }}\n" >> CHANGELOG.md
-          echo "## vyos-build\n" >> CHANGELOG.md
-          echo "${{ steps.generate_build_changelog.outputs.changelog }}" >> CHANGELOG.md
+          echo -e "## vyos-1x\n" > CHANGELOG.md
+          echo -e "${{ steps.generate_1x_changelog.outputs.changelog }}\n" >> CHANGELOG.md
+          echo -e "## vyos-build\n" >> CHANGELOG.md
+          echo -e "${{ steps.generate_build_changelog.outputs.changelog }}" >> CHANGELOG.md
 
       - name: Create autocommit and tag
         uses: stefanzweifel/git-auto-commit-action@v4
